@@ -1,0 +1,21 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true
+    },
+    "hide-files.files": [],
+    "cSpell.words": [
+        "appendbytes",
+        "appendtext",
+        "fernet",
+        "fsspec",
+        "readbytes",
+        "readtext",
+        "writebytes",
+        "writetext"
+    ]
+}
