@@ -4,6 +4,17 @@ version = "0.0.0"
 description = ""
 authors = ["patrick o'leary <pjaol@pjaol.com>"]
 readme = "README.md"
+homepage = "https://github.com/thevgergroup/fsspec-encrypted"
+repository = "https://github.com/thevgergroup/fsspec-encrypted.git"
+keywords = ["filesystem", "encryption", "fsspec"]
+license = "MIT"
+classifiers= [
+                "Topic :: System :: Filesystems",
+                "Topic :: Security :: Cryptography",  
+                "Topic :: Security"
+                ]
+
+
 
 [tool.poetry.dependencies]
 python = "^3.9"
