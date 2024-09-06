@@ -2,12 +2,32 @@
 
 **fsspec-encrypted** is a Python package that provides an encrypted filesystem layer using the `fsspec` interface. It allows users to transparently encrypt and decrypt files while maintaining compatibility with any underlying `fsspec`-compatible filesystem (e.g., local, S3, GCS, etc.).
 
+This is a port of [fs-encrypted](https://github.com/thevgergroup/fs-encrypted) to [fsspec](https://github.com/fsspec/filesystem_spec/) mainly because of inactivity and possible abandonment of the underlying file system pyfilesystem2.
+
+`fsspec-encrypted` is an AES encrypted driver for `fsspec`
+
+
 ## Features
 
 - **Encryption on top of any filesystem**: Works with any `fsspec`-supported filesystem (e.g., local, S3, GCS).
 - **Automatic encryption and decryption**: Data is automatically encrypted during writes and decrypted during reads.
 - **Pluggable with `fsspec`**: Easily integrate with `fsspec`'s existing ecosystem.
 - **Simple and flexible**: Minimal setup required with flexible file system options.
+
+
+## Application
+
+Applications that may require sensitive data storage should use an encrypted file system. By providing a layer of abstraction on top of the encryption our hope is to make it easier to store this data.
+
+PII / PHI
+* Print Billing systems
+* Insurance services / Identity cards
+* Data Transfer
+* Secure distributed configuration
+
+Fernet is used as the encryption method (v0.1), this may become a configurable option in future revisions
+
+
 
 ## Installation
 
@@ -72,7 +92,7 @@ If you'd like to contribute or modify the code, you can set up the project for d
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/fsspec-encrypted.git
+   git clone https://github.com/thevgergroup/fsspec-encrypted.git
    cd fsspec-encrypted
    ```
 
@@ -91,25 +111,3 @@ The project uses `pytest` for testing. To run the test suite, simply use:
 ```bash
 poetry run pytest
 ```
-
-### Building and Publishing to PyPI
-
-To build and publish the package to PyPI, follow these steps:
-
-1. Build the package:
-
-   ```bash
-   poetry build
-   ```
-
-2. Publish the package:
-
-   ```bash
-   poetry publish
-   ```
-
-Ensure your PyPI credentials are configured in your Poetry settings before publishing.
-
-## License
-
-This project is licensed under the MIT License.
