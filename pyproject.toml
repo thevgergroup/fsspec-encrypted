@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fsspec-encrypted"
-version = "0.1.0"
+version = "0.0.0"
 description = ""
 authors = ["patrick o'leary <pjaol@pjaol.com>"]
 readme = "README.md"
@@ -15,9 +15,11 @@ cryptography = "^43.0.1"
 pytest = "^8.3.2"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"
 
+[tool.poetry-dynamic-versioning]
+enable = true
 
 [tool.poetry.plugins."fsspec.specs"]
 enc = "fsspec_encrypted:EncryptedFS"
