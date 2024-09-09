@@ -2,51 +2,68 @@ import argparse
 import fsspec
 from cryptography.fernet import Fernet
 import sys
+import base64
+import os
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
 
-def generate_key():
-    """Generates a new encryption key and prints it to stdout."""
-    key = Fernet.generate_key()
-    print(f"{key.decode()}")
-
-def determine_filesystem(file_path :str):
-    """
-    Determines the filesystem type based on the file path.
-    Returns the fsspec filesystem and the cleaned path.
-    """
-    if file_path.startswith("s3://"):
-        #fs = fsspec.filesystem('s3')
-        return "s3", file_path
-    elif file_path.startswith("gcs://"):
-        fs = fsspec.filesystem('gcs')
-    elif file_path.startswith("ftp://"):
-        fs = fsspec.filesystem('ftp')
+def generate_key(passphrase=None, salt=None):
+    """Generates a new encryption key, optionally from a passphrase, and prints it to stdout."""
+    if passphrase:
+        verbose = False
+        if not salt:
+            verbose = True
+        key, salt = generate_key_from_passphrase(passphrase, salt)
+        
+        if verbose:
+            print(f"Derived Key: {key.decode()}")
+            print(f"Salt (in hex): {salt.hex()}")
+        else:
+            print(f"{key.decode()}")
+            
     else:
-        # Default to local filesystem
-        fs = fsspec.filesystem('file')
+        key = Fernet.generate_key()
+        print(f"{key.decode()}")
 
-    return fs, file_path
+def generate_key_from_passphrase(passphrase: str, salt: bytes = None) -> bytes:
+    """Derive a Fernet key from a passphrase using PBKDF2HMAC."""
+    if salt is None:
+        # It's important to use a unique, random salt for each key derivation
+        salt = os.urandom(16)
+
+    # Derive a key from the passphrase
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,  # Fernet requires a 32-byte key
+        salt=salt,
+        iterations=100000,  # The number of iterations is configurable for security
+        backend=default_backend()
+    )
+    key = base64.urlsafe_b64encode(kdf.derive(passphrase.encode()))
+    
+    return key, salt
 
 def encrypt_and_write(encryption_key, filename, input_data):
     """Encrypts input data and writes it to the specified file."""
-    fs, path = determine_filesystem(filename)
-    print(fs)
-    enc_fs = fsspec.filesystem('enc', root_path=path, encryption_key=encryption_key, underlying_fs=fs)
+    enc_fs = fsspec.filesystem('enc', encryption_key=encryption_key)
     enc_fs.writetext(filename, input_data)
     print(f"Data has been encrypted and written to {filename}")
 
 def decrypt_and_read(encryption_key, filename):
     """Decrypts data from the specified file and prints it."""
-    fs, path = determine_filesystem(filename)
-    enc_fs = fsspec.filesystem('enc', root_path=path, encryption_key=encryption_key, underlying_fs=fs)
+    enc_fs = fsspec.filesystem('enc', encryption_key=encryption_key)
     decrypted_data = enc_fs.readtext(filename)
-    print(f"Decrypted data from {filename}:\n{decrypted_data}")
+    print(f"{decrypted_data}")
 
 def main():
     parser = argparse.ArgumentParser(description="Encrypt or decrypt files using fsspec-encrypted.")
     subparsers = parser.add_subparsers(dest="command")
 
-    # Generate key command
+    # Generate key command with optional passphrase and salt
     parser_gen_key = subparsers.add_parser("gen-key", help="Generate a new encryption key.")
+    parser_gen_key.add_argument("--passphrase", help="Passphrase to derive the encryption key.")
+    parser_gen_key.add_argument("--salt", help="Optional salt (hex-encoded) to use with the passphrase.")
 
     # Encrypt command
     parser_encrypt = subparsers.add_parser("encrypt", help="Encrypt input and write to a file.")
@@ -61,7 +78,8 @@ def main():
     args = parser.parse_args()
 
     if args.command == "gen-key":
-        generate_key()
+        salt = bytes.fromhex(args.salt) if args.salt else None
+        generate_key(args.passphrase, salt)
     elif args.command == "encrypt":
         # Read input data from stdin
         input_data = sys.stdin.read()
@@ -70,7 +88,6 @@ def main():
         decrypt_and_read(args.key, args.file)
     else:
         parser.print_help()
-
 
 if __name__ == "__main__":
     main()
