@@ -19,7 +19,13 @@ class EncryptedFS(fsspec.AbstractFileSystem):
         self.encryption_key = encryption_key
         self.cipher_suite = Fernet(encryption_key)
         # Initialize the underlying filesystem (defaults to local 'file')
-        self.fs = fsspec.filesystem(underlying_fs, auto_mkdir=True)
+        #self.fs = fsspec.filesystem(underlying_fs, auto_mkdir=True)
+        # Use different filesystem initialization depending on the type of filesystem
+        if underlying_fs == "file":
+            self.fs = fsspec.filesystem(underlying_fs, auto_mkdir=True)  # Only local filesystems need auto_mkdir
+        else:
+            self.fs = fsspec.filesystem(underlying_fs)  # For S3, GCS, and others, we omit auto_mkdir
+
         self.root_path = root_path
 
     def encrypt(self, data: bytes) -> bytes:

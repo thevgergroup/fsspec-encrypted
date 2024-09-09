@@ -25,6 +25,10 @@ cryptography = "^43.0.1"
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.2"
 
+
+[tool.poetry.group.examples.dependencies]
+s3fs = "^2024.9.0"
+
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
 build-backend = "poetry_dynamic_versioning.backend"
@@ -34,3 +38,6 @@ enable = true
 
 [tool.poetry.plugins."fsspec.specs"]
 enc = "fsspec_encrypted:EncryptedFS"
+
+[tool.poetry.scripts]
+fs-enc = "fsspec_encrypted.fs_enc_cli:main"
