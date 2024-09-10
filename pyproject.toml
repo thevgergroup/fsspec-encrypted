@@ -28,6 +28,7 @@ pytest = "^8.3.2"
 
 [tool.poetry.group.examples.dependencies]
 s3fs = "^2024.9.0"
+pandas = "^2.2.2"
 
 
 [tool.poetry.group.dev.dependencies]

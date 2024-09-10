@@ -20,11 +20,11 @@ def generate_key(passphrase=None, salt=None):
             print(f"Derived Key: {key.decode()}")
             print(f"Salt (in hex): {salt.hex()}")
         else:
-            print(f"{key.decode()}")
+            return key
             
     else:
         key = Fernet.generate_key()
-        print(f"{key.decode()}")
+        return key
 
 def generate_key_from_passphrase(passphrase: str, salt: bytes = None) -> bytes:
     """Derive a Fernet key from a passphrase using PBKDF2HMAC."""
@@ -79,7 +79,10 @@ def main():
 
     if args.command == "gen-key":
         salt = bytes.fromhex(args.salt) if args.salt else None
-        generate_key(args.passphrase, salt)
+        key = generate_key(args.passphrase, salt)
+        if key is not None:
+            print(key.decode())
+            
     elif args.command == "encrypt":
         # Read input data from stdin
         input_data = sys.stdin.read()

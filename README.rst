@@ -23,6 +23,7 @@ pyfilesystem2.
    -  `Usage <#usage>`__
 
       -  `Local Filesystem Example <#local-filesystem-example>`__
+      -  `Pandas compatibility <#pandas-compatibility>`__
       -  `S3 Filesystem Example <#s3-filesystem-example>`__
       -  `Other Filesystems <#other-filesystems>`__
 
@@ -113,6 +114,38 @@ Local Filesystem Example
 
    # Read the encrypted data back from the file
    print(enc_fs.readtext('./encfs/example.txt'))
+
+Pandas compatibility
+~~~~~~~~~~~~~~~~~~~~
+
+Pandas uses ``fsspec`` under the hood, which lets you using the read /
+to methods to encrypt data Additional note, we are using the
+generate_key here with a passphrase and salt to allow for reusable key
+
+.. code:: python
+
+   import pandas as pd
+   from fsspec_encrypted.fs_enc_cli import generate_key
+
+   # Your encryption key
+   encryption_key = generate_key(passphrase="my_secret_passphrase", salt=b"12345432")
+
+   # Create a sample DataFrame
+   data = {
+       'name': ['Alice', 'Bob', 'Charlie'],
+       'age': [25, 30, 35]
+   }
+   df = pd.DataFrame(data)
+
+   # This encrypts the file to disk
+   df.to_csv('enc://./encfs/encrypted-file.csv', index=False, storage_options={"encryption_key": encryption_key})
+
+   print("Data written to encrypted file with key:", encryption_key.decode())
+
+   # Read and decrypt the file
+   df2 = pd.read_csv('enc://./encfs/encrypted-file.csv', storage_options={"encryption_key": encryption_key})
+
+   print(df2)
 
 S3 Filesystem Example
 ~~~~~~~~~~~~~~~~~~~~~
