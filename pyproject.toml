@@ -3,7 +3,7 @@ name = "fsspec-encrypted"
 version = "0.0.0"
 description = ""
 authors = ["patrick o'leary <pjaol@pjaol.com>"]
-readme = "README.md"
+readme = "README.rst"
 homepage = "https://github.com/thevgergroup/fsspec-encrypted"
 repository = "https://github.com/thevgergroup/fsspec-encrypted.git"
 keywords = ["filesystem", "encryption", "fsspec"]
@@ -28,6 +28,10 @@ pytest = "^8.3.2"
 
 [tool.poetry.group.examples.dependencies]
 s3fs = "^2024.9.0"
+
+
+[tool.poetry.group.dev.dependencies]
+readme-renderer = "^44.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]

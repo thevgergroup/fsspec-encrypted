@@ -1,3 +1,6 @@
+## Development notes
+
+
 ### Demo script
 
  
@@ -29,3 +32,8 @@ fs-enc decrypt --key $key  --file s3://fssec-test/encrypted-file.txt
 ```
 
 
+### Generating rst
+
+```sh
+pandoc --from=markdown --to=rst --output=README.rst README.md
+```
