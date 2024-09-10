@@ -2,21 +2,22 @@ fsspec-encrypted
 ================
 
 ``fsspec-encrypted`` is a Python package that provides an encrypted
-filesystem layer using the ``fsspec`` interface. It allows users to
-transparently encrypt and decrypt files while maintaining compatibility
-with any underlying ``fsspec``-compatible filesystem (e.g., local, S3,
-GCS, etc.).
+filesystem layer using the ``fsspec`` interface.
 
-This is a port of
-`fs-encrypted <https://github.com/thevgergroup/fs-encrypted>`__ to
-`fsspec <https://github.com/fsspec/filesystem_spec/>`__ mainly because
-of inactivity and possible abandonment of the underlying file system
-pyfilesystem2.
+It allows users to transparently encrypt and decrypt files while
+maintaining compatibility with any underlying ``fsspec``-compatible
+filesystem (e.g., local, S3, GCS, etc.).
+
+This supersedes
+`fs-encrypted <https://github.com/thevgergroup/fs-encrypted>`__ as it
+appears pyfilesystem2 is no longer maintained. So we are switching to
+`fsspec <https://github.com/fsspec/filesystem_spec/>`__ which has a
+broad level of adoption.
 
 -  `fsspec-encrypted <#fsspec-encrypted>`__
 
    -  `Note <#note>`__
-   -  `Key <#key>`__
+   -  `Keys <#keys>`__
    -  `Features <#features>`__
    -  `Application <#application>`__
    -  `Installation <#installation>`__
@@ -46,10 +47,11 @@ Note
 A note about Fernet - it’s great as an encryption method for smaller
 files, ideally those that fit in memory. As the entire file contents are
 used for decryption, ensuring if an attacker only gets a part of a file,
-then it’s can’t be used.
+then it’s can’t be used. Our roadmap will contain a configurable large
+file encryption method
 
-Key
----
+Keys
+----
 
 We use a Fernet key, ensure you store the keys securely!!!! A lost key
 means lost data!
@@ -149,6 +151,9 @@ generate_key here with a passphrase and salt to allow for reusable key
 
 S3 Filesystem Example
 ~~~~~~~~~~~~~~~~~~~~~
+
+This is an example of using encryption on top of other file systems,
+where we wrap S3 and encrypt or decrypt as required.
 
 .. code:: python
 
