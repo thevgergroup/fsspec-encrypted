@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "fsspec-encrypted"
 version = "0.0.0"
-description = ""
+description = "A fsspec filesystem that encrypts files, compatible with pandas"
 authors = ["patrick o'leary <pjaol@pjaol.com>"]
 readme = "README.rst"
 homepage = "https://github.com/thevgergroup/fsspec-encrypted"

@@ -1,13 +1,20 @@
+import random
+import string
 import pytest
 import fsspec
 from cryptography.fernet import Fernet
 import os
 
+from fsspec_encrypted.fs_enc import EncryptedFS
+
 
 @pytest.fixture
 def encryption_key():
     """Fixture to generate an encryption key for testing."""
-    return Fernet.generate_key()
+    #return Fernet.generate_key()
+    passphrase = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(8))
+    salt = os.urandom(16)
+    return EncryptedFS.derive_key(passphrase, salt)
 
 
 @pytest.fixture

@@ -1,11 +1,10 @@
 # fsspec-encrypted
 
-`fsspec-encrypted` is a Python package that provides an encrypted filesystem layer using the `fsspec` interface. 
+`fsspec-encrypted` is a package that provides an encrypted filesystem for use with Python.
+It's built on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) making it compatible with Cloud Services like S3, GCS, Azure Blob Service / Data Lake etc.
+As well as bringing encryption to Pandas Data Frames.
 
 It allows users to transparently encrypt and decrypt files while maintaining compatibility with any underlying `fsspec`-compatible filesystem (e.g., local, S3, GCS, etc.).
-
-This supersedes [fs-encrypted](https://github.com/thevgergroup/fs-encrypted) as it appears pyfilesystem2 is no longer maintained.
-So we are switching to [fsspec](https://github.com/fsspec/filesystem_spec/) which has a broad level of adoption.
 
 
 - [fsspec-encrypted](#fsspec-encrypted)
@@ -31,33 +30,52 @@ So we are switching to [fsspec](https://github.com/fsspec/filesystem_spec/) whic
 
 
 ## Note
-`fsspec-encrypted` is an AES / Fernet encrypted driver for `fsspec`
-A note about Fernet - it's great as an encryption method for smaller files, ideally those that fit in memory. 
-As the entire file contents are used for decryption, ensuring if an attacker only gets a part of a file, then it's can't be used.
-Our roadmap will contain a configurable large file encryption method
+This supersedes [fs-encrypted](https://github.com/thevgergroup/fs-encrypted) as it appears pyfilesystem2 is no longer maintained.
+So we are switching to [fsspec](https://github.com/fsspec/filesystem_spec/) which has a broad level of adoption.
+
+
+`fsspec-encrypted` is an AES-256 CBC encrypted driver for `fsspec`
+The entire file is buffered to memory before written to disk with the pandas to_* methods, this is to reduce time spent on decrypting and re-encrypting by chunk.
+
+Our roadmap will be to switch to AES-CTR to allow for streaming encryption, which will reduce the need for a larger memory footprint.
+
 
 ## Keys
-We use a Fernet key, ensure you store the keys securely!!!! A lost key means lost data! 
+We use a keys, ensure you store the keys securely!!!! 
+A lost key means lost data! 
+
+Keys are natively bytes, and should be base64 encoded / decoded, use the methods EncryptedFS.key_to_str and EncryptedFS.str_to_key, for storing, transmitting, and especially copying + pasting. 
+These helper methods are named as I couldn't remember if I should encode or decode - so write once and forget.
+
+e.g.
+
+```python
+from fsspec_encrypted.fs_enc_cli import generate_key
+from fsspec_encrypted.fs_enc import EncryptedFS
+
+# Your encryption key
+encryption_key = generate_key(passphrase="my_secret_passphrase", salt=b"12345432")
+print("Encryption key:", EncryptedFS.key_to_str(encryption_key))
+
+```
 
 ## Features
 
-- **Encryption on top of any filesystem**: Works with any `fsspec`-supported filesystem (e.g., local, S3, GCS).
+- **Encryption on top of any filesystem**: Works with any `fsspec`-supported filesystem (e.g., local, S3, GCS, FTP, Azure).
 - **Automatic encryption and decryption**: Data is automatically encrypted during writes and decrypted during reads.
-- **Pluggable with `fsspec`**: Easily integrate with `fsspec`'s existing ecosystem.
+- **CLI**: Provides for easy scripting and key generation
 - **Simple and flexible**: Minimal setup required with flexible file system options.
 
 
 ## Application
 
-Applications that may require sensitive data storage should use an encrypted file system. By providing a layer of abstraction on top of the encryption our hope is to make it easier to store this data.
+Applications that may require sensitive data storage should use an encrypted file system. By providing a layer of abstraction on top of the encryption our hope is to make it safer to store this data.
 
 PII / PHI
 * Print Billing systems
 * Insurance services / Identity cards
 * Data Transfer
 * Secure distributed configuration
-
-Fernet is used as the encryption method (v0.1), this may become a configurable option in future revisions
 
 
 
@@ -78,10 +96,10 @@ Here's a simple example of using `fsspec-encrypted` to create an encrypted files
 
 ```python
 import fsspec
-from cryptography.fernet import Fernet
+from fsspec_encrypted.fs_enc_cli import generate_key
 
 # Generate an encryption key
-encryption_key = Fernet.generate_key()
+encryption_key = generate_key(passphrase="my_secret_passphrase", salt=b"12345432")
 
 # Create an EncryptedFS instance (local filesystem is the default)
 enc_fs = fsspec.filesystem('enc', encryption_key=encryption_key)
@@ -145,6 +163,11 @@ enc_fs.writetext('s3://your-bucket/example.txt', 'This is some encrypted text.')
 
 # Read the encrypted data back from S3
 print(enc_fs.readtext('s3://your-bucket/example.txt'))
+
+# This can also be done by wrapping the filesystem
+bucket="some-bucket"
+df = pd.read_csv(f'enc://s3://{bucket}/encrypted-file.csv', storage_options={"encryption_key": encryption_key})
+
 ```
 
 
@@ -154,6 +177,9 @@ print(enc_fs.readtext('s3://your-bucket/example.txt'))
 `fsspec-encrypted` automatically determines the filesystem type based on the file path. 
 
 For example, if the path starts with s3://, it will use S3; otherwise, it defaults to the local filesystem. It supports any fsspec-compatible filesystem (e.g., GCS, FTP).
+
+For wrapping the filesystem we can use `enc://<other-file-system>://`
+
 
 ## CLI
 
@@ -178,7 +204,8 @@ fs-enc gen-key --passphrase 'hello world' --salt 12345432
 ```
 
 ### What is a Salt?
-A salt is a random value used during the key derivation process to ensure that even if two people use the same passphrase, the derived encryption keys will be different. The salt is not a secret, but it should be unique and random for each encryption.
+A salt is a random 16 byte value used during the key derivation process to ensure that even if two people use the same passphrase, 
+the derived encryption keys will be different. The salt is not a secret, but it should be unique and random for each encryption.
 
 When encrypting data, the salt is usually stored alongside the encrypted data so that it can be used again during decryption to derive the same encryption key from the passphrase.
 

@@ -11,10 +11,14 @@
     "cSpell.words": [
         "appendbytes",
         "appendtext",
+        "decryptor",
         "fernet",
         "fsspec",
+        "openbin",
         "readbytes",
         "readtext",
+        "unpadder",
+        "urandom",
         "writebytes",
         "writetext"
     ]
