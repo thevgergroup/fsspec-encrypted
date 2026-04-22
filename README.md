@@ -1,5 +1,7 @@
 # fsspec-encrypted
 
+<img src="docs/images/logo.jpg" alt="fsspec-encrypted logo" width="280"/>
+
 `fsspec-encrypted` is a package that provides an encrypted filesystem for use with Python.
 It's built on [fsspec](https://filesystem-spec.readthedocs.io/en/latest/) making it compatible with Cloud Services like S3, GCS, Azure Blob Service / Data Lake etc.
 As well as bringing encryption to Pandas Data Frames.
