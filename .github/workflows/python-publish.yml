@@ -12,7 +12,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.x"
+        python-version: "3.11"
     - name: Install pypa/build
       run: >-
         python3 -m
@@ -29,8 +29,7 @@ jobs:
     - name: Setup Env
       run: |
         python3 -m pip install poetry
-        poetry install
-        poetry add pytest
+        poetry install --with test
 
     - name: Test Build
       run: >-
